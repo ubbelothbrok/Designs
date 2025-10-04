@@ -33,9 +33,9 @@ erDiagram
         string gst_number UK
         string business_address_line1
         string business_address_line2
-        string business_address_state
+        enum business_address_state
         string business_address_district
-        string business_address_pincode
+        int business_address_pincode
         string bank_account_number
         string ifsc_code
         datetime business_since
