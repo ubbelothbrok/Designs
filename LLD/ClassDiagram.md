@@ -1,105 +1,149 @@
 ```mermaid
 classDiagram
     %% User Management Classes
+    class User
+    class Customer
+    class ShopOwner
+    class Admin
+    class DeliveryExecutive
+
+    %% Core Business Classes
+    class Shop
+    class Category
+    class Product
+    class InventoryLog
+
+    %% Order Management Classes
+    class Order
+    class OrderItem
+    class Cart
+    class CartItem
+
+    %% Address & Location Classes
+    class Address
+    class ShopDeliveryArea
+
+    %% Payment Classes
+    class Payment
+    class CustomerPaymentMethod
+
+    %% Reviews & Support Classes
+    class Review
+    class ReviewRating
+    class SupportTicket
+    class TicketMessage
+
+    %% User Inheritance Hierarchy
+    User <|-- Customer
+    User <|-- ShopOwner
+    User <|-- Admin
+    User <|-- DeliveryExecutive
+
+    %% Shop Management Relationships
+    ShopOwner -- Shop : owns
+    Shop -- Product : sells
+    Shop -- Order : processes
+    Shop -- ShopDeliveryArea : deliversTo
+
+    %% Product Catalog Relationships
+    Category -- Product : categorizes
+    Category -- Category : hasSubcategories
+
+    %% Customer Activities
+    Customer -- Order : places
+    Customer -- Address : has
+    Customer -- Cart : maintains
+    Customer -- CustomerPaymentMethod : stores
+    Customer -- Review : writes
+
+    %% Shopping Cart Relationships
+    Cart -- CartItem : contains
+    Product -- CartItem : addedIn
+
+    %% Order Processing Relationships
+    Order -- OrderItem : contains
+    Product -- OrderItem : orderedAs
+
+    %% Delivery & Logistics
+    DeliveryExecutive -- Order : delivers
+    Order -- Payment : has
+    Order -- Address : deliveredTo
+
+    %% Inventory Management
+    Product -- InventoryLog : tracksChanges
+
+    %% Reviews & Ratings
+    Review -- ReviewRating : hasBreakdown
+
+    %% Customer Support
+    SupportTicket -- TicketMessage : contains
+    User -- SupportTicket : creates
+    Admin -- SupportTicket : handles
+
+    %% Method Definitions
     class User {
-        -String userId
-        -String email
-        -String phone
-        -String passwordHash
-        -UserType userType
-        -DateTime createdAt
-        -DateTime lastLogin
-        -boolean isActive
         +login()
         +logout()
+        +register()
+        +forgotPassword()
         +updateProfile()
     }
 
     class Customer {
-        -String name
-        -List~Address~ addresses
-        -List~PaymentMethod~ paymentMethods
-        -List~Order~ orderHistory
-        -Cart activeCart
-        -List~String~ favoriteShops
-        +addToCart()
         +placeOrder()
-        +trackOrder()
-        +addReview()
+        +addToCart()
+        +manageAddresses()
+        +writeReview()
+        +trackOrders()
     }
 
     class ShopOwner {
-        -String shopName
-        -String gstin
-        -String businessAddress
-        -List~Shop~ shops
-        -List~Staff~ staffMembers
-        -BankAccount bankAccount
-        +manageInventory()
+        +manageShop()
         +viewSalesReport()
-        +manageStaff()
+        +manageInventory()
+        +handleOrders()
     }
 
     class Admin {
-        -String adminId
-        -AdminRole role
         +manageUsers()
         +viewPlatformAnalytics()
-        +manageCategories()
         +handleDisputes()
+        +manageCategories()
     }
 
-    %% Core E-commerce Classes
+    class DeliveryExecutive {
+        +updateLocation()
+        +acceptOrder()
+        +updateDeliveryStatus()
+        +viewAssignedOrders()
+    }
+
     class Shop {
-        -String shopId
-        -String name
-        -String description
-        -Address location
-        -List~ShopCategory~ categories
-        -List~Product~ products
-        -List~Order~ orders
-        -ShopStatus status
-        -DeliveryRadius deliveryRadius
-        -TimeSpan openingHours
-        +updateStatus()
-        +getProducts()
+        +updateShopDetails()
+        +manageProducts()
+        +viewOrders()
+        +updateDeliveryAreas()
     }
 
     class Product {
-        -String productId
-        -String name
-        -String description
-        -String brand
-        -double price
-        -double discountedPrice
-        -int stockQuantity
-        -List~String~ images
-        -ProductCategory category
-        -boolean isAvailable
-        -Map~String, String~ attributes
         +updateStock()
-        +updatePrice()
+        +updatePricing()
+        +manageImages()
     }
 
-    class Inventory {
-        -String inventoryId
-        -String shopId
-        -Map~String, int~ stockLevels
-        -DateTime lastUpdated
-        -List~StockAlert~ lowStockAlerts
-        +updateStock()
-        +checkAvailability()
-        +getLowStockItems()
+    class Category {
+        +manageSubcategories()
+        +updateDisplayOrder()
+    }
+
+    class Order {
+        +updateStatus()
+        +calculateTotal()
+        +trackDelivery()
+        +cancelOrder()
     }
 
     class Cart {
-        -String cartId
-        -String customerId
-        -List~CartItem~ items
-        -double totalAmount
-        -double deliveryFee
-        -double taxAmount
-        -String shopId
         +addItem()
         +removeItem()
         +updateQuantity()
@@ -107,131 +151,27 @@ classDiagram
         +clearCart()
     }
 
-    class CartItem {
-        -String productId
-        -String productName
-        -int quantity
-        -double unitPrice
-        -double totalPrice
-    }
-
-    class Order {
-        -String orderId
-        -String customerId
-        -String shopId
-        -OrderStatus status
-        -List~OrderItem~ items
-        -double orderAmount
-        -double deliveryFee
-        -Address deliveryAddress
-        -PaymentDetails payment
-        -DeliveryExecutive deliveryExecutive
-        -DateTime orderTime
-        -DateTime estimatedDelivery
-        +updateStatus()
-        +cancelOrder()
-        +calculateETA()
-    }
-
-    class OrderItem {
-        -String productId
-        -String productName
-        -int quantity
-        -double unitPrice
-        -double totalPrice
-    }
-
-    %% Delivery & Logistics
-    class DeliveryExecutive {
-        -String executiveId
-        -String name
-        -String phone
-        -Vehicle vehicle
-        -CurrentLocation currentLocation
-        -List~Order~ assignedOrders
-        -AvailabilityStatus status
-        +updateLocation()
-        +acceptOrder()
-        +completeDelivery()
-    }
-
-    class DeliveryTracking {
-        -String trackingId
-        -String orderId
-        -List~TrackingEvent~ events
-        -Location currentLocation
-        -double distanceRemaining
-        -DateTime estimatedArrival
-        +updateLocation()
-        +addTrackingEvent()
-    }
-
-    %% Payment System
     class Payment {
-        -String paymentId
-        -String orderId
-        -PaymentMethod method
-        -PaymentStatus status
-        -double amount
-        -String transactionId
-        -DateTime paymentTime
         +processPayment()
-        +refundPayment()
+        +initiateRefund()
+        +verifyTransaction()
     }
 
-    class PaymentMethod {
-        -String methodId
-        -PaymentType type
-        -String details
-        -boolean isDefault
-    }
-
-    %% Reviews & Support
     class Review {
-        -String reviewId
-        -String orderId
-        -String customerId
-        -int rating
-        -String comment
-        -List~String~ images
-        -DateTime reviewDate
-        +addReview()
+        +submitRating()
         +editReview()
+        +uploadImages()
     }
 
     class SupportTicket {
-        -String ticketId
-        -String userId
-        -TicketType type
-        -String description
-        -TicketStatus status
-        -List~Message~ messages
-        -DateTime createdAt
         +addMessage()
-        +updateStatus()
+        +updatePriority()
+        +resolveTicket()
+        +assignToAdmin()
     }
 
-    %% Relationships
-    User <|-- Customer
-    User <|-- ShopOwner
-    User <|-- Admin
-
-    Customer "1" --> "0..*" Order
-    Customer "1" --> "1" Cart
-    Customer "1" --> "0..*" Address
-    Customer "1" --> "0..*" PaymentMethod
-
-    ShopOwner "1" --> "1..*" Shop
-    Shop "1" --> "0..*" Product
-    Shop "1" --> "0..*" Order
-    
-    Product "1" --> "1" Inventory
-    Cart "1" --> "0..*" CartItem
-    Order "1" --> "0..*" OrderItem
-    
-    Order "1" --> "0..1" DeliveryExecutive
-    Order "1" --> "1" Payment
-    Order "1" --> "0..1" Review
-    
-    DeliveryExecutive "1" --> "0..*" DeliveryTracking
+    class InventoryLog {
+        +logStockChange()
+        +generateStockReport()
+    }
 ```
